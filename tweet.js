@@ -1,12 +1,17 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost:27017/relations');
+const MONGO_URI =
+	process.env.MONGO_URI || 'mongodb://localhost:27017/relations';
 
-const database = mongoose.connection;
-
-database.on('error', console.error.bind(console, 'database connection error'));
-
-database.once('open', () => console.log('Database connected'));
+async function connectDB() {
+	try {
+		await mongoose.connect(MONGO_URI);
+		console.log('✅ Database connected');
+	} catch (err) {
+		console.error('❌ Database connection error:', err.message);
+		process.exit(1);
+	}
+}
 
 const userSchema = new mongoose.Schema({
 	username: String,
@@ -59,6 +64,15 @@ async function showTweets() {
 	return await Tweet.find({}).populate('user', 'username');
 }
 
-makeTweets()
-	.then(() => showTweets().then((t) => console.log(t)))
-	.finally(() => database.close());
+(async () => {
+	await connectDB();
+	try {
+		await makeTweets();
+		const tweets = await showTweets();
+		console.log('Tweets with users:', tweets);
+	} catch (err) {
+		console.error('Error:', err);
+	} finally {
+		await mongoose.connection.close();
+	}
+})();
