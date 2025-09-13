@@ -5,7 +5,8 @@
 	"type": "commonjs",
 	"scripts": {
 		"start": "node app.js",
-		"seed-product": "node farms.js"
+		"seed-product": "node farms.js",
+		"tweet": "node tweet.js"
 	},
 	"keywords": [],
 	"author": "",
